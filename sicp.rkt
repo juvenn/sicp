@@ -108,3 +108,78 @@
   (lambda (f)
     (lambda (x)
       ((n f) ((m f) x)))))
+
+;; Alyssa's interval arithmetic
+;; Exercise 2.7
+
+(define (make-interval m M)
+  (cons m M))
+
+(define (lower-bound x)
+  (car x))
+
+(define (upper-bound x)
+  (cdr x))
+
+(define (add-interval x y)
+  (make-interval (+ (lower-bound x) (lower-bound y))
+                 (+ (upper-bound x) (upper-bound y))))
+
+(define (mul-interval x y)
+  (let ((p1 (* (lower-bound x) (lower-bound y)))
+        (p2 (* (lower-bound x) (upper-bound y)))
+        (p3 (* (upper-bound x) (lower-bound y)))
+        (p4 (* (upper-bound x) (upper-bound y))))
+    (make-interval (min p1 p2 p3 p4)
+                   (max p1 p2 p3 p4))))
+
+; Exercise 2.11
+; x0 = (lower-bound x), x1 = (upper-bound x)
+; 1: x0 >= 0, 0: x1 >= 0 and x0 < 0, -1: x1 < 0
+; x, y:
+; 1, 1: x0 * y0, x1 * y1
+; 1, 0:
+; 1, -1:
+; 0, 1:
+; 0, 0: (min (* x0 y1) (* x1 y0)), (max (* x0 y0) (* x1 y1))
+; ...
+
+(define (div-interval x y)
+  (mul-interval x
+                (make-interval (/ 1.0 (upper-bound y))
+                               (/ 1.0 (lower-bound x)))))
+
+;; Exercise 2.8 interval subtraction
+;  Exercise 2.10
+(define (sub-interval x y)
+  (make-interval (- (lower-bound x) (upper-bound y))
+                 (- (upper-bound x) (lower-bound y))))
+
+;; Exercise 2.9 width of interval
+(define (interval-width z)
+  (/ (- (upper-bound z)
+        (lower-bound z))
+     2.0))
+
+; (+ (interval-width x) (interval-width y))
+; => (+ (/ (- (upper-bound x) (lower-bound x)) 2.0)
+;    (/ (- (upper-bound y) (lower-bound y)) 2.0))
+; => (/ (+ (- (upper-bound x) (lower-bound x))
+;       (- (upper-bound y) (lower-bound y)) )
+;    2.0)
+; => (/ (- (+ (upper-bound x) (upper-bound y))
+;       (+ (lower-bound x) (lower-bound y)))
+;    2.0)
+; => (interval-width (add-interval x y))
+
+; (interval-width (sub-interval x y))
+; => (interval-width (make-interval (- (lower-bound x) (upper-bound y))
+;                                   (- (upper-bound x) (lower-bound y))))
+; => (/ (- (- (upper-bound x) (lower-bound y))
+;          (- (lower-bound x) (upper-bound y))) 2)
+; => (/ (+ (- (upper-bound x) (lower-bound x))
+;          (- (upper-bound y) (lower-bound x))) 2)
+; => (+ (/ (- (upper-bound x) (lower-bound x)) 2)
+;       (/ (- (upper-bound y) (lower-bound x)) 2))
+; => (+ (interval-width x) (interval-width y))
+
