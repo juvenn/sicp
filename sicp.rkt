@@ -143,6 +143,34 @@
 ; 0, 1:
 ; 0, 0: (min (* x0 y1) (* x1 y0)), (max (* x0 y0) (* x1 y1))
 ; ...
+(define (mul-interval2 x y)
+  (cond ((>= (lower-bound x) 0)
+         (cond ((>= (lower-bound y) 0)
+                (make-interval (* (lower-bound x) (lower-bound y))
+                               (* (upper-bound x) (upper-bound y))))
+               ((>= (upper-bound y) 0)
+                (make-interval (* (upper-bound x) (lower-bound y))
+                               (* (upper-bound x) (upper-bound y))))
+               (else
+                (make-interval (* (upper-bound x) (lower-bound y))
+                               (* (lower-bound x) (upper-bound y))))))
+        ((>= (upper-bound x) 0)
+         (cond ((>= (lower-bound y) 0)
+                (mul-interval2 y x))
+               ((>= (upper-bound y) 0)
+                (make-interval (min (* (lower-bound x) (upper-bound y))
+                                    (* (upper-bound x) (lower-bound y)))
+                               (max (* (lower-bound x) (lower-bound y))
+                                    (* (upper-bound x) (upper-bound y)))))
+               (else
+                (make-interval (* (upper-bound x) (lower-bound y))
+                               (* (lower-bound x) (lower-bound y))))))
+        (else
+         (cond ((< (upper-bound y) 0)
+                (make-interval (* (upper-bound x) (upper-bound y))
+                               (* (lower-bound x) (lower-bound y))))
+               (else
+                (mul-interval2 y x))))))
 
 (define (div-interval x y)
   (mul-interval x
