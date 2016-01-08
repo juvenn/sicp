@@ -211,3 +211,63 @@
 ;       (/ (- (upper-bound y) (lower-bound x)) 2))
 ; => (+ (interval-width x) (interval-width y))
 
+
+(define (make-center-width c w)
+  (make-interval (- c w) (+ c w)))
+
+(define (center i)
+  (/ (+ (lower-bound i) (upper-bound i)) 2))
+
+(define (width i)
+  (/ (- (upper-bound i) (lower-bound i)) 2))
+
+;; Exercise 2.12 percentage tolerance
+(define (make-center-percentage c p)
+  (let (w (/ (* c p) 100.0))
+    (make-interval (- c w) (+ c w))))
+
+(define (percent i)
+  (/ (/ (- (upper-bound i) (lower-bound i))
+        (+ (upper-bound i) (lower-bound i)))
+     100.0))
+
+(define (percent2 i)
+  (let ((c (center i))
+        (w (- (upper-bound i) c)))
+    (/ (/ w c) 100.0)))
+
+;; Exercise 2.13 percentage tolerance of product of intervals
+; Assume 1. small percentage tolerance, 2. positive interval
+; Denote following symbols:
+; x0 (lower-bound x)
+; x1 (upper-bound x)
+; Px (percent x)
+;
+; Also note:
+; x1 = x0 * (1 + Px)/(1 - Px)
+; (percent (mul-interval x y))
+; (percent (make-interval (* (lower-bound x) (lower-bound y))
+;                         (* (upper-bound x) (upper-bound y))))
+; (percent (make-interval (* x0 y0)
+;                         (* x1 y1)))
+; (/ (/ (- (* x1 y1) (* x0 y0))
+;       (+ (* x1 y1) (* x0 y0))) 100.0)
+; 
+; ;; substitue x1 and y1 with x0 y0
+; (/ (/ (- (* (* x0 (/ (+ 1 Px) (- 1 Px)))
+;             (* y0 (/ (+ 1 Py) (- 1 Py))))
+;          (* x0 y0))
+;       (+ (* (* x0 (/ (+ 1 Px) (- 1 Px)))
+;             (* y0 (/ (+ 1 Py) (- 1 Py))))
+;          (* x0 y0))) 100.0)
+; ;; eliminate common (* x0 y0)
+; (/ (/  (- (* (/ (+ 1 Px) (- 1 Px))
+;              (/ (+ 1 Py) (- 1 Py)))
+;           1)
+;        (+ (* (/ (+ 1 Px) (- 1 Px))
+;              (/ (+ 1 Py) (- 1 Py)))
+;           1)) 100.0)
+; (/ (+ Px Py)
+;    (+ (* Px Py) 1))
+; ;; Assuming Px Py are small, (* Px Py) can be neglected
+; (+ Px Py)
